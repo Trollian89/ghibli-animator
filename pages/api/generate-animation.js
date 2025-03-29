@@ -25,7 +25,7 @@ export default async function handler(req, res) {
 
   try {
     const { fields, files } = await parseForm(req);
-    const prompt = fields.prompt?.toString().trim();
+    const prompt = fields.prompt?.toString().trim() || "a whimsical Studio Ghibli animation";
     const imageFile = files.image?.[0] || files.image;
 
     if (!imageFile) {
@@ -35,16 +35,21 @@ export default async function handler(req, res) {
     const buffer = fs.readFileSync(imageFile.filepath);
     const base64Image = `data:image/png;base64,${buffer.toString("base64")}`;
 
+    // Optional log for debugging
+    console.log("Prompt:", prompt);
+    console.log("Image length:", base64Image.length);
+    console.log("Base64 starts with:", base64Image.substring(0, 30));
+
     const replicateResponse = await axios.post(
       "https://api.replicate.com/v1/predictions",
       {
-        version: "4b7b8f3235fa0a3d3a395b291ae585f8db813eb35ee81ee1a5f6e46513bede6a", // lucataco/animate-diff-img2vid
+        version: "4b7b8f3235fa0a3d3a395b291ae585f8db813eb35ee81ee1a5f6e46513bede6a",
         input: {
           image: base64Image,
-          prompt: prompt || "a whimsical studio ghibli scene",
-          num_frames: 16,
-          fps: 8,
+          prompt,
           seed: 42,
+          num_frames: 16,
+          fps: 8
         },
       },
       {
@@ -79,7 +84,9 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ videoUrl: outputUrl });
   } catch (error) {
-    console.error("API error:", error);
-    return res.status(500).json({ error: error?.message || "Unexpected server error" });
+    console.error("Replicate API error:", error?.response?.data || error.message);
+    return res.status(500).json({
+      error: error?.response?.data?.error || error?.message || "Unexpected server error",
+    });
   }
 }
