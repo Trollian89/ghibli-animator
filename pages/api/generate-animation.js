@@ -1,4 +1,4 @@
-import formidable from "formidable";
+const formidable = require("formidable");
 import fs from "fs";
 import axios from "axios";
 
