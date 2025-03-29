@@ -1,10 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, ImagePlus } from "lucide-react";
 
 export default function GhibliAnimatorClone() {
   const [prompt, setPrompt] = useState("");
@@ -41,12 +37,7 @@ export default function GhibliAnimatorClone() {
         body: formData,
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        throw new Error("Invalid JSON response from the server");
-      }
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data?.error || "API request failed");
@@ -71,54 +62,51 @@ export default function GhibliAnimatorClone() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-100 to-blue-200 p-6 flex flex-col items-center justify-center">
-      <Card className="w-full max-w-xl shadow-2xl border-0">
-        <CardContent className="p-6 space-y-4">
-          <h1 className="text-3xl font-bold text-center text-gray-800">Studio Ghibli Animator</h1>
-          <Textarea
-            rows={4}
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe a whimsical Ghibli-style scene or upload an image..."
-            className="rounded-xl shadow-sm"
-          />
+      <div className="w-full max-w-xl bg-white rounded-xl shadow-2xl p-6 space-y-4">
+        <h1 className="text-3xl font-bold text-center text-gray-800">Studio Ghibli Animator</h1>
+        <textarea
+          rows={4}
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="Describe a whimsical Ghibli-style scene or upload an image..."
+          className="w-full p-3 border border-gray-300 rounded-lg resize-none shadow-sm"
+        />
 
-          <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <ImagePlus className="w-5 h-5" />
-              <span className="text-sm text-blue-800">Upload Image</span>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-            </label>
-            {image && <span className="text-xs text-gray-600">{image.name}</span>}
-          </div>
-
-          <Button
-            className="w-full text-white font-semibold text-lg"
-            onClick={generateAnimation}
-            disabled={loading}
-          >
-            {loading ? <Loader2 className="animate-spin" /> : "Generate Animation"}
-          </Button>
-
-          {errorMsg && (
-            <p className="text-red-600 text-sm font-medium text-center">{errorMsg}</p>
-          )}
-
-          {videoUrl && (
-            <video
-              src={videoUrl}
-              controls
-              autoPlay
-              loop
-              className="rounded-2xl mt-4 shadow-md"
+        <div className="flex items-center gap-3">
+          <label className="cursor-pointer text-blue-800 text-sm underline">
+            Upload Image
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageUpload}
             />
-          )}
-        </CardContent>
-      </Card>
+          </label>
+          {image && <span className="text-xs text-gray-600">{image.name}</span>}
+        </div>
+
+        <button
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+          onClick={generateAnimation}
+          disabled={loading}
+        >
+          {loading ? "Generating..." : "Generate Animation"}
+        </button>
+
+        {errorMsg && (
+          <p className="text-red-600 text-sm font-medium text-center">{errorMsg}</p>
+        )}
+
+        {videoUrl && (
+          <video
+            src={videoUrl}
+            controls
+            autoPlay
+            loop
+            className="rounded-2xl mt-4 shadow-md"
+          />
+        )}
+      </div>
     </div>
   );
 }
